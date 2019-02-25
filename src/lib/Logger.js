@@ -34,16 +34,9 @@ class Logger {
     info(action, message, obj) {
         const logParts = [
             `class=${this.className}`,
-            `action=${action}`
+            `action=${action}`,
+            `${message} :: ${this.pp(obj)}`
         ];
-
-        if (errorObj.message) {
-            logParts.push(`message=${errorObj.message}`);
-        }
-
-        if (obj !== undefined) {
-            logParts.push(this.pp(obj));
-        }
 
         console.log(logParts.join(' '));
     }
@@ -55,3 +48,5 @@ class Logger {
         return JSON.stringify(obj, null, 2);
     }
 }
+
+module.exports = Logger;

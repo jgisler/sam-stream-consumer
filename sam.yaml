@@ -6,6 +6,9 @@ Parameters:
   EnvironmentName:
     Type: String
     Description: Name of the environment. Used to name resources.
+  ExampleTableStreamArn:
+    Type: String
+    Description: Example table stream arn
   StreamConsumerMemorySizeInMb:
     Type: Number
     Description: Size of the memory allocated per invocation of the function in MB
@@ -20,23 +23,26 @@ Globals:
   Function:
     Runtime: nodejs8.10
     Tracing: PassThrough
-    Handler: ./src/index.handler
 
 Resources:
   StreamConsumer:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt StreamConsumerRole.Arn
+      Handler: src/index.handler
       CodeUri: ./sam-stream-consumer.zip
       Timeout: !Ref StreamConsumerTimeoutInSeconds
       MemorySize: !Ref StreamConsumerMemorySizeInMb
       Description: Stream event consumer Lambda function
+      Environment:
+        Variables:
+          EXAMPLE_TABLE_STREAM_ARN: !Ref ExampleTableStreamArn
 
   StreamConsumerLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${StreamConsumerFunction}
-      RetentionInDays: 14
+      LogGroupName: !Sub /aws/lambda/${StreamConsumer}
+      RetentionInDays: !Ref StreamConsumerLogRetentionInDays
 
   StreamConsumerRole:
     Type: AWS::IAM::Role
@@ -61,4 +67,7 @@ Resources:
             Action:
               - logs:Create*
               - logs:PutLogEvents
-        Resource: !GetAtt StreamConsumerLogGroup.Arn
+            Resource:
+              - !GetAtt StreamConsumerLogGroup.Arn
+      Roles:
+        - !Ref StreamConsumerRole

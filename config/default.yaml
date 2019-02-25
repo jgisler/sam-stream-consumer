@@ -6,6 +6,7 @@ Environment:
   DeploymentPrefix: sam-stream-consumer/test
 CloudFormation:
   EnvironmentName: test
+  ExampleTableStreamArn: arn:aws:dynamodb:us-west-2:account-id:table/ExampleTableWithStream/stream/2015-06-27T00:48:05.899
   StreamConsumerMemorySizeInMb: 128
   StreamConsumerTimeoutInSeconds: 10
   StreamConsumerLogRetentionInDays: 7

@@ -4,11 +4,16 @@
   "description": "Consume stream events from multiple sources",
   "main": "src/index.js",
   "scripts": {
-    "config": "./build/config.js",
-    "clean": "rimraf ${npm_package_name}.zip .env ./node_modules ./reports",
+    "config": "npm install && ./build/config.js",
+    "clean": "rimraf ${npm_package_name}.zip ./node_modules ./reports",
     "build": "npm run clean && npm install",
     "zip": "npm run build && npm prune --production && npm dedupe && zip -r ${npm_package_name}.zip ./src ./node_modules ./package.json -x ./node_modules/.bin ./node_modules/.cache",
-    "package": ". ./.env && aws cloudformation package --template-file sam.yaml --output-template-file sam-out.yaml --s3-bucket ${DeploymentBucket} --s3-prefix ${DeploymentPrefix} --region ${Region} --profile ${Profile}"
+    "package": "npm run zip && . ./.env && aws cloudformation package --template-file sam.yaml --output-template-file sam-out.yaml --s3-bucket ${DeploymentBucket} --s3-prefix ${DeploymentPrefix} --region ${Region} --profile ${Profile}",
+    "deploy": ". ./.env && aws cloudformation deploy --template-file sam-out.yaml --stack-name ${StackName} --s3-bucket ${DeploymentBucket} --s3-prefix ${DeploymentPrefix} --no-fail-on-empty-changeset --parameter-overrides ${CloudFormationParams} --tags ${TagParams} --capabilities CAPABILITY_NAMED_IAM --region ${Region} --profile ${Profile} && npm install && date",
+    "teardown": ". ./.env && aws cloudformation delete-stack --stack-name ${StackName} --region ${Region} --profile ${Profile} && aws cloudformation wait stack-delete-complete --stack-name ${StackName} --region ${Region} --profile ${Profile}",
+    "describe": ". ./.env && aws cloudformation describe-stack-resources --stack-name ${StackName} --region ${Region} --profile ${Profile}",
+    "validate": ". ./.env && aws cloudformation validate-template --template-body file://./sam.yaml",
+    "deploy:dev": "npm run config dev && npm run package && npm run deploy"
   },
   "repository": {
     "type": "git",
