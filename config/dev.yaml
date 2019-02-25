@@ -1,0 +1,7 @@
+Environment:
+  StackName: sam-stream-consumer-dev
+  DeploymentPrefix: sam-stream-consumer/dev
+CloudFormation:
+  EnvironmentName: dev
+Tags:
+  Environment: dev

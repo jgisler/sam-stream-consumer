@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Reference project for consuming event streams with Lambda
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Description: Name of the environment. Used to name resources.
+  StreamConsumerMemorySizeInMb:
+    Type: Number
+    Description: Size of the memory allocated per invocation of the function in MB
+  StreamConsumerTimeoutInSeconds:
+    Type: Number
+    Description: Maximum time that the function can run before it is killed in seconds
+  StreamConsumerLogRetentionInDays:
+    Type: Number
+    Description: The number of days log events are kept in CloudWatch Logs. When a log event expires, CloudWatch Logs automatically deletes it
+
+Globals:
+  Function:
+    Runtime: nodejs8.10
+    Tracing: PassThrough
+    Handler: ./src/index.handler
+
+Resources:
+  StreamConsumer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt StreamConsumerRole.Arn
+      CodeUri: ./sam-stream-consumer.zip
+      Timeout: !Ref StreamConsumerTimeoutInSeconds
+      MemorySize: !Ref StreamConsumerMemorySizeInMb
+      Description: Stream event consumer Lambda function
+
+  StreamConsumerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${StreamConsumerFunction}
+      RetentionInDays: 14
+
+  StreamConsumerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+  LoggingPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: LoggingPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:Create*
+              - logs:PutLogEvents
+        Resource: !GetAtt StreamConsumerLogGroup.Arn

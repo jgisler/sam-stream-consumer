@@ -1,0 +1,15 @@
+Environment:
+  StackName: sam-stream-consumer-test
+  Region: us-west-2
+  Profile: default
+  DeploymentBucket: deployment.us-west-2
+  DeploymentPrefix: sam-stream-consumer/test
+CloudFormation:
+  EnvironmentName: test
+  StreamConsumerMemorySizeInMb: 128
+  StreamConsumerTimeoutInSeconds: 10
+  StreamConsumerLogRetentionInDays: 7
+Tags:
+  Application: sam-stream-consumer
+  Environment: test
+  Email: jim.gisler@gmail.com
